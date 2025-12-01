@@ -1,0 +1,412 @@
+import pytest
+import logging
+import random
+import time
+from faker import Faker
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import TimeoutException
+from tests.page_objects.merchants_page import navigate_to_merchants_page
+from tests.data_generator.fake_data import generate_merchant_data
+
+
+logger = logging.getLogger(__name__)
+
+def test_create_merchant_cnpj(driver):
+
+    merchant_data = generate_merchant_data()
+    merchant_cnpj = merchant_data["cnpj"]
+    merchant_social_name = merchant_data["social_name"]
+    merchant_fantasy_name = merchant_data["fantasy_name"]
+    merchant_code = merchant_data["merchant_code"]
+    merchant_soft_descriptor = merchant_data["soft_descriptor"]
+    merchant_email = merchant_data["email"]
+    merchant_tpv = merchant_data["tpv"]
+    merchant_phone = merchant_data["phone"]
+    merchant_name = merchant_data["name"]
+    merchant_contact_email = merchant_data["contact_email"]
+
+    logger.info(f"Test Data: CNPJ='{merchant_cnpj}', Social Name='{merchant_social_name}', Fantasy Name='{merchant_fantasy_name}'")
+
+    navigate_to_merchants_page(driver)
+
+    try:
+        xpath_options = [
+            "//*[@id=\"app\"]/main/div[3]/div/div[1]/div[2]/button[1]/i",
+            "//*[@id=\"app\"]/main/div[3]/div/div[3]/div[1]/div[1]/button/span"
+        ]
+
+        create_merchant_button = None
+        for xpath in xpath_options:
+            try:
+                create_merchant_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, xpath))
+                )
+                logger.info(f"Found 'Create Merchant' Button using XPath: {xpath}")
+                break
+            except TimeoutException:
+                logger.info(f"did not find the xpath: {xpath}")
+                pass
+        
+        if create_merchant_button:
+            create_merchant_button.click()
+            logger.info("clicked 'Create Merchant' button")
+        else:
+            logger.error("Could not find the 'Create Merchant' button in either of the specified locations.")
+            pytest.fail("Failed to find the 'Create Merchant' button.")
+            return
+        
+        create_merchant_button.click()
+        logger.info("Clicked 'Create Merchant' button")
+
+        cnpj_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "document"))
+        )
+        cnpj_field.send_keys(merchant_cnpj)
+        logger.info("Filled CNPJ")
+        
+        social_name_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "socialName"))
+        )
+        social_name_field.send_keys(merchant_social_name)
+        logger.info("Filled Social Name")
+
+        fantasy_name_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "fantasyName"))
+        )
+        fantasy_name_field.send_keys(merchant_fantasy_name)
+        logger.info("Filled Fantasy Name")
+
+        merchant_code_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "merchantCode"))
+        )
+        merchant_code_field.send_keys(merchant_code)
+        logger.info("Filled Merchant Code")
+
+        soft_descriptor_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "softDescriptor"))
+        )
+        soft_descriptor_field.send_keys(merchant_soft_descriptor)
+        logger.info("Filled Soft Descriptor")
+
+        email_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "email"))
+        )
+        email_field.send_keys(merchant_email)
+        logger.info("Filled Email")
+
+        merchant_type_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.NAME, "type"))
+        )
+        dropdown = Select(merchant_type_field)
+        options = dropdown.options
+
+        #Exclude the first option if it is a placeholder
+        if options and options[0].text == "":
+            options = options[1:]
+
+        #Check if there are any options available
+        if not options:
+            raise ValueError("No options available in the dropdown menu.")
+        
+        random_option = random.choice(options)
+        dropdown.select_by_visible_text(random_option.text)
+        logger.info(f"Selected random option: {random_option.text}")
+        
+        mcc_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "mcc"))
+        )
+        mcc_field.send_keys("(763) Cooperativas Agrícolas")
+        logger.info("Filled MCC")
+
+        tpv_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "monthlyTpv"))
+        )
+        tpv_field.send_keys(merchant_tpv)
+        logger.info("Filled TPV")
+
+        work_hours_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[11]/div/label/select"))
+        )
+        work_hours_field.click()
+        logger.info("clicked on the work hours")
+
+        work_hours_selection_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[11]/div/label/select/option[9]"))
+        )
+        work_hours_selection_field.click()
+        logger.info("Selected the work hours")
+        
+        #Filling contact information
+
+        contact_type = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[19]/div[2]/div[1]/div/label/select"))
+        )
+        contact_type.click()
+        logger.info("Clicked on the Contact Type")
+
+        contact_type_selection = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[19]/div[2]/div[1]/div/label/select/option[1]"))
+        )
+        contact_type_selection.click()
+        logger.info("Selected on the Contact Type")
+
+        #DDD
+        ddd_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[19]/div[2]/div[2]/div/div[2]/div/label/input"))
+        )
+        ddd_field.click()
+        logger.info("Clicked DDD")
+
+        ddd_field.send_keys("11")
+        logger.info("Filled DDD")
+
+        #Telephone
+        phone_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[19]/div[2]/div[2]/div/div[3]/div/label/input"))
+        )
+        phone_field.click()
+        logger.info("Clicked Phone")
+
+        phone_field.send_keys("111111111")
+        logger.info("Filled Phone")
+
+        #Name
+        name_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[19]/div[2]/div[3]/div/label/input"))
+        )
+        name_field.click()
+        logger.info("Clicked Name")
+
+        name_field.send_keys("automation")
+        logger.info("Filled Name")
+
+        #Email
+        contact_email_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[19]/div[2]/div[4]/div/label/input"))
+        )
+        contact_email_field.click()
+        logger.info("Clicked Contact Email")
+
+        contact_email_field.send_keys(merchant_contact_email)
+        logger.info("Filled Contact Email")
+
+        #Add the contact
+        add_contact_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[19]/button/i"))
+        )
+        add_contact_button.click()
+        logger.info("Added Contact")
+
+        address_advance_button = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[1]/div/div[22]/div/div/button[1]"))
+        )
+        address_advance_button.click()
+        logger.info("Advancing to address section")
+
+        #Address Section
+
+        cep_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[2]/div[1]/div[1]/div/label/input"))
+        )
+        cep_field.click()
+        cep_field.send_keys("03015000")
+        logger.info("Filled CEP")
+
+        address_number_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[2]/div[1]/div[3]/div/label/input"))
+        )
+        address_number_field.click()
+        address_number_field.send_keys("1907")
+        logger.info("Filled Address Number")
+
+        time.sleep(3)
+
+        #Bank Account Section
+
+        bank_advance_button = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[2]/div[2]/div/div/div/button[1]"))
+        )
+        bank_advance_button.click()
+        logger.info("Advanced to bank account section")
+
+        account_type = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "accountType"))
+        )
+        account_type.click()
+        logger.info("Selected Account Type")
+
+        account_type_selection = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH,"/html/body/div[1]/main/div[3]/div/div/div[2]/div/span/form[3]/div[1]/div[1]/div/label/select/option[1]"))
+        )
+        account_type_selection.click()
+        logger.info("Filled Account Type")
+
+        bank_name = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[3]/div[1]/div[2]/div/label/div[2]/div[2]"))
+        )
+        bank_name.click()
+        logger.info("Clicked on Bank Selection")
+
+        bank_name_filler = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[3]/div[1]/div[2]/div/label/div[2]/div[2]/input"))
+        )
+        bank_name_filler.send_keys("001 - Banco do Brasil S.A.")
+        bank_name_filler.send_keys(Keys.ENTER)
+        logger.info("Selected Bank")
+
+        branch_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/main/div[3]/div/div/div[2]/div/span/form[3]/div[1]/div[3]/div/label/input"))
+        )
+        branch_field.click()
+        logger.info("Clicked on branch field")
+
+        branch_field.send_keys("0001")
+        logger.info("Filled branch field")
+
+        account_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/main/div[3]/div/div/div[2]/div/span/form[3]/div[1]/div[4]/div/label/input"))
+        )
+        account_field.click()
+        logger.info("Clicked on account field")
+
+        account_field.send_keys("12345")
+        logger.info("Filled account field")
+
+        digit_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/main/div[3]/div/div/div[2]/div/span/form[3]/div[1]/div[5]/div/label/input"))
+        )
+        digit_field.click()
+        logger.info("Clicked on digit field")
+
+        digit_field.send_keys("1")
+        logger.info("Filled digit field")
+
+        finish_creation_button = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[2]/div/span/form[3]/div[2]/div/div/button[1]"))
+        )
+        finish_creation_button.click()
+        logger.info("Merchant Created Successfully")
+        time.sleep(5)
+
+        validate_merchant_creation = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div/div[1]/div/div[3]/div/button"))
+        )
+        validate_merchant_creation.click()
+        time.sleep(3)
+        logger.info("Merchant Created and Activated Successfully")
+
+        print("Merchant page test passed.")
+    
+    except Exception as e:
+        pytest.fail(f"Create Merchant failed.")
+        raise
+
+
+import pytest
+import logging
+import random
+from faker import Faker
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
+from tests.page_objects.merchants_page import navigate_to_merchants_page
+from tests.data_generator.fake_data import generate_merchant_data
+
+
+logger = logging.getLogger(__name__)
+
+def test_create_merchant_cnpj(driver):
+
+    merchant_data = generate_merchant_data()
+    merchant_cnpj = merchant_data["cnpj"]
+    merchant_social_name = merchant_data["social_name"]
+    merchant_fantasy_name = merchant_data["fantasy_name"]
+    merchant_code = merchant_data["merchant_code"]
+    merchant_soft_descriptor = merchant_data["soft_descriptor"]
+    merchant_email = merchant_data["email"]
+
+    logger.info(f"Test Data: CNPJ='{merchant_cnpj}', Social Name='{merchant_social_name}', Fantasy Name='{merchant_fantasy_name}'")
+
+    navigate_to_merchants_page(driver)
+
+    try:
+        create_merchant_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div[3]/div[1]/div[1]/button/span"))
+        )
+        create_merchant_button.click()
+        logger.info("Clicked 'Create Merchant' button")
+
+        cnpj_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "document"))
+        )
+        cnpj_field.send_keys(merchant_cnpj)
+        logger.info("Filled CNPJ")
+        
+        social_name_field = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "socialName"))
+        )
+        social_name_field.send_keys(merchant_social_name)
+        logger.info("Filled Social Name")
+
+        fantasy_name_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "fantasyName"))
+        )
+        fantasy_name_field.send_keys(merchant_fantasy_name)
+        logger.info("Filled Fantasy Name")
+
+        merchant_code_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "merchantCode"))
+        )
+        merchant_code_field.send_keys(merchant_code)
+        logger.info("Filled Merchant Code")
+
+        soft_descriptor_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "softDescriptor"))
+        )
+        soft_descriptor_field.send_keys(merchant_soft_descriptor)
+        logger.info("Filled Soft Descriptor")
+
+        email_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "email"))
+        )
+        email_field.send_keys(merchant_email)
+        logger.info("Filled Email")
+
+        merchant_type_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "type"))
+        )
+        dropdown = Select(merchant_type_field)
+        options = dropdown.options
+
+        #Exclude the first option if it is a placeholder
+        if options and options[0].text == "":
+            options = options[1:]
+
+        #Check if there are any options available
+        if not options:
+            raise ValueError("No options available in the dropdown menu.")
+        
+        random_option = random.choice(options)
+        dropdown.select_by_visible_text(random_option.text)
+        logger.info(f"Selected random option: {random_option.text}")
+        
+        mcc_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "mcc"))
+        )
+        mcc_field.send_keys("(763) Cooperativas Agrícolas")
+        logger.info("Filled MCC")
+
+        
+
+        
+        print("Merchant page test passed.")
+    
+    except Exception as e:
+        pytest.fail(f"Create Merchant failed.")
+        raise
+

@@ -1,0 +1,79 @@
+# """
+# Testes de Login do Portal Aditum - REFATORADO.
+# """
+# import pytest
+# from tests.page_objects.login_page import LoginPage
+# from tests.page_objects.dashboard_page import DashboardPage
+# from portal_automation.utils.config import Config
+
+# @pytest.mark.login
+# class TestLogin:
+#     """
+#     Classe de testes para a funcionalidade de Login.
+#     """
+    
+#     @pytest.fixture(autouse=True)
+#     def setup(self, driver):
+#         """
+#         Setup executado antes de cada teste na classe.
+#         Inicializa as Page Objects e navega para a página de login.
+#         """
+#         self.driver = driver
+#         self.config = Config()
+#         self.login_page = LoginPage(driver)
+#         self.dashboard_page = DashboardPage(driver)
+#         self.login_page.navigate()
+    
+#     @pytest.mark.smoke
+#     @pytest.mark.critical
+#     def test_login_with_valid_credentials_should_succeed(self):
+#         """
+#         Cenário: Login com credenciais válidas deve ter sucesso.
+#         """
+#         # ARRANGE (Organizar)
+#         email = self.config.EMAIL
+#         password = self.config.PASSWORD
+        
+#         # ACT (Agir)
+#         self.login_page.login(email, password)
+        
+#         # ASSERT (Verificar)
+#         assert self.dashboard_page.is_dashboard_loaded(), \
+#             "Dashboard não carregou após login válido."
+#         assert self.dashboard_page.is_user_logged_in(), \
+#             "Indicador de usuário logado não encontrado."
+
+#     # @pytest.mark.regression
+#     # def test_login_with_invalid_password_should_fail(self):
+#     #     """
+#     #     Cenário: Login com senha inválida deve falhar.
+#     #     """
+#     #     # ARRANGE
+#     #     email = self.config.email
+#     #     invalid_password = "senha_incorreta_123"
+        
+#     #     # ACT
+#     #     self.login_page.login(email, invalid_password)
+        
+#     #     # ASSERT
+#     #     assert self.login_page.is_error_message_displayed(), \
+#     #         "Mensagem de erro não foi exibida para senha inválida."
+#     #     assert not self.dashboard_page.is_user_logged_in(), \
+#     #         "Usuário foi logado com senha inválida, o que não deveria acontecer."
+
+#     # @pytest.mark.regression
+#     # def test_login_with_empty_fields_should_fail(self):
+#     #     """
+#     #     Cenário: Tentar logar com campos vazios deve falhar.
+#     #     """
+#     #     # ARRANGE
+#     #     # N/A
+        
+#     #     # ACT
+#     #     self.login_page.click_login_button()
+        
+#     #     # ASSERT
+#     #     assert self.login_page.is_login_page_loaded(), \
+#     #         "Página de login foi submetida com campos vazios."
+#     #     # Aqui você poderia adicionar uma asserção para verificar a mensagem de erro
+#     #     # específica de campo obrigatório, se houver um locator para ela.

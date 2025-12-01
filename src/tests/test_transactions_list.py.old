@@ -1,0 +1,42 @@
+import pytest
+import logging
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from tests.page_objects.transactions_page import navigate_to_transactions_list_page 
+
+
+logger = logging.getLogger(__name__)
+
+def test_filters(driver):
+
+    navigate_to_transactions_list_page(driver)
+
+    try:
+        status_dropdown = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[@id=\"app\"]/main/div[3]/div/div[1]/div/div[1]/h4"))
+        )
+
+        status_dropdown.click()
+
+        autorizada_option = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, "//*[@id=\"status\"]"))
+        )
+
+        autorizada_option = driver.find_element(By.XPATH, "//*[@id=\"status\"]/option[2]")
+        autorizada_option.click()
+
+        # TO DO
+        # Add assertions to verify that the filter has been applied correctly
+        # (e.g., check that the displayed       transactions have the "Autorizada" status)
+        # This is where you would add more specific assertions to confirm the filtering worked
+        # first_transaction_status = WebDriverWait(driver, 10).until(
+        #     EC.presence_of_element_located((By.XPATH, "//table[@id='transactions-table']/tbody/tr[1]/td[4]"))
+        # ).text
+        # assert first_transaction_status == "Autorizada"
+
+        print("Status filter test passed.")
+    
+    except Exception as e:
+        pytest.fail(f"Status filter test failed. {e}")
+        raise
