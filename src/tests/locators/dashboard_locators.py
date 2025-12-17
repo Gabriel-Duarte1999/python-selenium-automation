@@ -12,7 +12,8 @@ class DashboardLocators:
     
     # --- Itens de Menu Principal ---
     TRANSACIONAL_MENU = (By.XPATH, "//div[@class='adt_sidenav-title']//span[text()='Transacional']")
-    LINK_PAGAMENTOS_MENU = (By.XPATH, "//span[text()='Link de Pagamentos']/parent::div/parent::li")
+    PAYMENT_LINKS_MENU = (By.XPATH, "//span[contains(text(), 'Link de Pagamentos')]")
+    PAYMENT_LINKS_MENU = (By.XPATH, "//span[contains(text(), 'Link de Pagamentos')]")
     GERENCIAMENTO_MENU = (By.XPATH, "//span[text()='Gerenciamento']/parent::div/parent::li")
     CONTA_DIGITAL_MENU = (By.XPATH, "//span[text()='Conta Digital']/parent::div/parent::li")
     
@@ -20,6 +21,9 @@ class DashboardLocators:
     DASHBOARD_SUBMENU = (By.XPATH, "//a[@href='/summary']")
     TRANSACOES_SUBMENU = (By.XPATH, "//*[@id=\"app\"]/main/nav/ul/div/ul[1]/li[3]")    
     RESUMO_SUBMENU = (By.XPATH, "//a[@href='/charge/resume']")
+    
+    # --- Submenus do Link de Pagamento ---
+    PAYMENT_LINKS_SUBMENU = (By.XPATH, "//*[@id=\"app\"]/main/nav/ul/div/ul[2]/li[2]")
     
     # --- Submenus do Gerenciamento ---
     ESTABELECIMENTOS_SUBMENU = (By.XPATH, "//a[contains(@href, '/merchant')]")
